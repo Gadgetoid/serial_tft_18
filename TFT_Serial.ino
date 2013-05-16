@@ -32,11 +32,22 @@ unsigned char y_pos=0;
 unsigned char text_size=2;
 unsigned char screen_width=160;
 unsigned char mode=MODE_TEXT;
-unsigned int foreground=ST7735_WHITE;
-unsigned int background=ST7735_BLACK;
 
 unsigned char inputString[40];         // a string to hold incoming data
 int inputStringIndex = 0;
+
+// Bring colour constants into variables so we can redefine at runtime
+unsigned int col_black   = ST7735_BLACK;
+unsigned int col_blue    = ST7735_BLUE;
+unsigned int col_red     = ST7735_RED;
+unsigned int col_green   = ST7735_GREEN;
+unsigned int col_cyan    = ST7735_CYAN;
+unsigned int col_magenta = ST7735_MAGENTA;
+unsigned int col_yellow  = ST7735_YELLOW;
+unsigned int col_white   = ST7735_WHITE;
+
+unsigned int foreground  = col_white;
+unsigned int background  = col_black;
 
   
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
@@ -70,6 +81,70 @@ void setup(void) {
   else sd_card=1;
   
   tftInit();
+
+  col_black = 0x1A8;
+  col_red   = 0xD985;
+  col_green = 0x84C0;
+  col_yellow = 0xB440;
+  col_blue = 0x245A;
+  col_magenta = 0xD1B0;
+  col_cyan = 0x2D13;
+  col_white = 0xEF5A;
+
+  foreground = col_white;
+  background = col_black;
+
+  tft.print("Hello World");
+  delay(500);
+  tft.fillScreen(col_black);
+
+  tft.setCursor(x_pos, y_pos);
+  tft.setTextColor(col_red, background);
+  tft.print("red");
+  delay(500);
+  tft.fillScreen(col_black);
+
+  tft.setCursor(x_pos, y_pos);
+  tft.setTextColor(col_green, background);
+  tft.print("green");
+  delay(500);
+  tft.fillScreen(col_black);
+
+  tft.setCursor(x_pos, y_pos);
+  tft.setTextColor(col_yellow, background);
+  tft.print("yellow");
+  delay(500);
+  tft.fillScreen(col_black);
+
+  tft.setCursor(x_pos, y_pos);
+  tft.setTextColor(col_blue, background);
+  tft.print("blue");
+  delay(500);
+  tft.fillScreen(col_black);
+
+  tft.setCursor(x_pos, y_pos);
+  tft.setTextColor(col_magenta, background);
+  tft.print("magenta");
+  delay(500);
+  tft.fillScreen(col_black);
+
+  tft.setCursor(x_pos, y_pos);
+  tft.setTextColor(col_cyan, background);
+  tft.print("cyan");
+  delay(500);
+  tft.fillScreen(col_black);
+
+  tft.setCursor(x_pos, y_pos);
+  tft.setTextColor(col_white, background);
+  tft.print("white");
+  delay(500);
+  tft.fillScreen(col_black);
+
+  tft.setCursor(x_pos, y_pos);
+  delay(1000);
+
+  tft.setTextColor(foreground,background);
+  tft.fillScreen(col_black);
   
   Serial.begin(9600);
 }
@@ -171,6 +246,9 @@ void serialEvent() {
           case 14: 
             tft_backlight();      // Backlight
             break;  
+          case 15:
+            tft_set_color();
+            break;
           
         }
         inputString[0] = '\0';
@@ -202,7 +280,7 @@ void tftInit()
   char i;
   
   tft.setTextWrap(false);
-  tft.fillScreen(ST7735_BLACK);
+  tft.fillScreen(col_black);
   tft.setTextSize(2);
   
   tft.setCursor(x_pos, y_pos);
@@ -226,71 +304,83 @@ void tft_fontsize()
   }  
 }
 
+void tft_set_color()
+{
+    unsigned int new_color = ((unsigned int)inputString[1] << 8) + inputString[2];
+    switch(inputString[1])
+    {
+      case 0: 
+        col_black = new_color;
+        break;
+      case 1: 
+        col_blue = new_color;
+        break;
+      case 2: 
+        col_red = new_color;
+        break;
+      case 3: 
+        col_green = new_color;
+        break;
+      case 4: 
+        col_cyan = new_color;
+        break;
+      case 5: 
+        col_magenta = new_color;
+        break;
+      case 6: 
+        col_yellow = new_color;
+        break;
+      case 7: 
+        col_white = new_color;
+        break;
+    } 
+}
+
+unsigned int get_color()
+{
+    switch(inputString[1])
+    {
+      case 0: 
+        return col_black;
+        break;
+      case 1: 
+        return col_blue;
+        break;
+      case 2: 
+        return col_red;
+        break;
+      case 3: 
+        return col_green;
+        break;
+      case 4: 
+        return col_cyan;
+        break;
+      case 5: 
+        return col_magenta;
+        break;
+      case 6: 
+        return col_yellow;
+        break;
+      case 7: 
+        return col_white;
+        break;
+    }  
+}
+
 void tft_set_fg_color()
 {
   if(inputString[1]<=7)
   {
-    switch(inputString[1])
-    {
-      case 0: 
-        foreground=ST7735_BLACK;
-        break;
-      case 1: 
-        foreground=ST7735_BLUE;
-        break;
-      case 2: 
-        foreground=ST7735_RED;
-        break;
-      case 3: 
-        foreground=ST7735_GREEN;
-        break;
-      case 4: 
-        foreground=ST7735_CYAN;
-        break;
-      case 5: 
-        foreground=ST7735_MAGENTA;
-        break;
-      case 6: 
-        foreground=ST7735_YELLOW;
-        break;
-      case 7: 
-        foreground=ST7735_WHITE;
-        break;
-    }   
+    foreground = get_color();
   }
   tft.setTextColor(foreground, background);  
 }
+
 void tft_set_bg_color()
 {
   if(inputString[1]<=7)
   {
-    switch(inputString[1])
-    {
-      case 0: 
-        background=ST7735_BLACK;
-        break;
-      case 1: 
-        background=ST7735_BLUE;
-        break;
-      case 2: 
-        background=ST7735_RED;
-        break;
-      case 3: 
-        background=ST7735_GREEN;
-        break;
-      case 4: 
-        background=ST7735_CYAN;
-        break;
-      case 5: 
-        background=ST7735_MAGENTA;
-        break;
-      case 6: 
-        background=ST7735_YELLOW;
-        break;
-      case 7: 
-        background=ST7735_WHITE;
-        break;
-    }
+    background = get_color();
   }  
   tft.setTextColor(foreground, background);
 }
