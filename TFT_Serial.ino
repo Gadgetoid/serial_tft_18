@@ -37,14 +37,28 @@ unsigned char inputString[40];         // a string to hold incoming data
 int inputStringIndex = 0;
 
 // Bring colour constants into variables so we can redefine at runtime
-unsigned int col_black   = ST7735_BLACK;
-unsigned int col_blue    = ST7735_BLUE;
-unsigned int col_red     = ST7735_RED;
-unsigned int col_green   = ST7735_GREEN;
-unsigned int col_cyan    = ST7735_CYAN;
-unsigned int col_magenta = ST7735_MAGENTA;
-unsigned int col_yellow  = ST7735_YELLOW;
-unsigned int col_white   = ST7735_WHITE;
+
+// Color definitions
+  /*
+#define ST7735_BLACK   0x0000
+#define ST7735_BLUE    0x001F
+#define ST7735_RED     0xF800
+#define ST7735_GREEN   0x07E0
+#define ST7735_CYAN    0x07FF
+#define ST7735_MAGENTA 0xF81F
+#define ST7735_YELLOW  0xFFE0  
+#define ST7735_WHITE   0xFFFF
+*/
+
+
+unsigned int col_black   = 0x0000;
+unsigned int col_blue    = 0x001F;
+unsigned int col_red     = 0xF800;
+unsigned int col_green   = 0x07E0;
+unsigned int col_cyan    = 0x07FF;
+unsigned int col_magenta = 0xF81F;
+unsigned int col_yellow  = 0xFFE0;
+unsigned int col_white   = 0xFFFF;
 
 unsigned int foreground  = col_white;
 unsigned int background  = col_black;
@@ -72,16 +86,40 @@ void setup(void) {
   // Check for SD Card
   if (!SD.begin(SD_CS)) 
   {
-    // No SD card, or failed to initialise card
+    // No SD card, or failed to initialise card0
     sd_card=0;
     // Arduino SD library does something to SPI speed when it fails
     // So need to reset otherwise screen is slow.
     SPI.setClockDivider(SPI_CLOCK_DIV4); // 16/4 MHz
   }  
   else sd_card=1;
-  
+
   tftInit();
 
+/*  if(sd_card==1)
+  {
+    tft.print("SD!"); 
+File config = SD.open("config.txt");
+
+if(config){ 
+
+  col_black = config.parseInt();
+  col_red   = config.parseInt();
+  col_green = config.parseInt();
+  col_yellow = config.parseInt();
+  col_blue = config.parseInt();
+  col_magenta = config.parseInt();
+  col_cyan = config.parseInt();
+  col_white = config.parseInt();
+  
+  config.close();
+
+}
+  }
+*/
+
+
+/*
   col_black = 0x1A8;
   col_red   = 0xD985;
   col_green = 0x84C0;
@@ -94,58 +132,14 @@ void setup(void) {
   foreground = col_white;
   background = col_black;
 
-  tft.print("Hello World");
-  delay(500);
-  tft.fillScreen(col_black);
+  tft_test();
+*/
+/*
+  foreground = col_black;
+  background = col_white;
 
-  tft.setCursor(x_pos, y_pos);
-  tft.setTextColor(col_red, background);
-  tft.print("red");
-  delay(500);
-  tft.fillScreen(col_black);
-
-  tft.setCursor(x_pos, y_pos);
-  tft.setTextColor(col_green, background);
-  tft.print("green");
-  delay(500);
-  tft.fillScreen(col_black);
-
-  tft.setCursor(x_pos, y_pos);
-  tft.setTextColor(col_yellow, background);
-  tft.print("yellow");
-  delay(500);
-  tft.fillScreen(col_black);
-
-  tft.setCursor(x_pos, y_pos);
-  tft.setTextColor(col_blue, background);
-  tft.print("blue");
-  delay(500);
-  tft.fillScreen(col_black);
-
-  tft.setCursor(x_pos, y_pos);
-  tft.setTextColor(col_magenta, background);
-  tft.print("magenta");
-  delay(500);
-  tft.fillScreen(col_black);
-
-  tft.setCursor(x_pos, y_pos);
-  tft.setTextColor(col_cyan, background);
-  tft.print("cyan");
-  delay(500);
-  tft.fillScreen(col_black);
-
-  tft.setCursor(x_pos, y_pos);
-  tft.setTextColor(col_white, background);
-  tft.print("white");
-  delay(500);
-  tft.fillScreen(col_black);
-
-  tft.setCursor(x_pos, y_pos);
-  delay(1000);
-
-  tft.setTextColor(foreground,background);
-  tft.fillScreen(col_black);
-  
+  tft_test();
+  */
   Serial.begin(9600);
 }
 
@@ -153,6 +147,66 @@ void loop() {
   
   // Nothing
 }
+
+/*
+void tft_test()
+{
+
+  tft.setTextSize(3);
+
+  tft.print("Hello World");
+  delay(500);
+  tft.fillScreen(background);
+
+  tft.setCursor(x_pos, y_pos);
+  tft.setTextColor(col_red, background);
+  tft.print("red");
+  delay(500);
+  tft.fillScreen(background);
+
+  tft.setCursor(x_pos, y_pos);
+  tft.setTextColor(col_green, background);
+  tft.print("green");
+  delay(500);
+  tft.fillScreen(background);
+
+  tft.setCursor(x_pos, y_pos);
+  tft.setTextColor(col_yellow, background);
+  tft.print("yellow");
+  delay(500);
+  tft.fillScreen(background);
+
+  tft.setCursor(x_pos, y_pos);
+  tft.setTextColor(col_blue, background);
+  tft.print("blue");
+  delay(500);
+  tft.fillScreen(background);
+
+  tft.setCursor(x_pos, y_pos);
+  tft.setTextColor(col_magenta, background);
+  tft.print("magenta");
+  delay(500);
+  tft.fillScreen(background);
+
+  tft.setCursor(x_pos, y_pos);
+  tft.setTextColor(col_cyan, background);
+  tft.print("cyan");
+  delay(500);
+  tft.fillScreen(background);
+
+  tft.setCursor(x_pos, y_pos);
+  tft.setTextColor(col_white, background);
+  tft.print("white");
+  delay(500);
+  tft.fillScreen(background);
+
+  tft.setCursor(x_pos, y_pos);
+  delay(500);
+
+  tft.setTextColor(foreground,background);
+  tft.fillScreen(background);
+}
+*/
 
 /*
   SerialEvent occurs whenever a new data comes in the
@@ -280,7 +334,7 @@ void tftInit()
   char i;
   
   tft.setTextWrap(false);
-  tft.fillScreen(col_black);
+  tft.fillScreen(background);
   tft.setTextSize(2);
   
   tft.setCursor(x_pos, y_pos);
