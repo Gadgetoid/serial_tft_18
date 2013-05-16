@@ -96,7 +96,9 @@ void setup(void) {
 
   tftInit();
 
-/*  if(sd_card==1)
+/*
+  if(sd_card==1)
+  
   {
     tft.print("SD!"); 
 File config = SD.open("config.txt");
@@ -247,7 +249,10 @@ void serialEvent() {
     else
     {
       // in COMMAND MODE
-      if (inChar == COMMAND_END)
+      if (
+        (inChar == COMMAND_END && inputString[0] != 15) // Natural command end
+        || (inputString[0] == 15 && inputStringIndex == 4) // Specific command length
+        )
       {
         // End of command received - validate and run command
         
@@ -360,7 +365,8 @@ void tft_fontsize()
 
 void tft_set_color()
 {
-    unsigned int new_color = ((unsigned int)inputString[1] << 8) + inputString[2];
+    unsigned int new_color = (unsigned char)inputString[3] | ((unsigned char)inputString[2] << 8);
+
     switch(inputString[1])
     {
       case 0: 
