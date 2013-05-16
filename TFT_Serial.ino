@@ -25,6 +25,7 @@
 #define MODE_TEXT    0
 #define COMMAND_START 0x1B
 #define COMMAND_END 0xFF
+#define MAX_COLS 16
 
 unsigned char sd_card=0;       // SD Card inserted?
 unsigned char x_pos=0;
@@ -39,30 +40,30 @@ int inputStringIndex = 0;
 // Bring colour constants into variables so we can redefine at runtime
 
 // Color definitions
-  /*
-#define ST7735_BLACK   0x0000
-#define ST7735_BLUE    0x001F
-#define ST7735_RED     0xF800
-#define ST7735_GREEN   0x07E0
-#define ST7735_CYAN    0x07FF
-#define ST7735_MAGENTA 0xF81F
-#define ST7735_YELLOW  0xFFE0  
-#define ST7735_WHITE   0xFFFF
-*/
 
+unsigned int cols[MAX_COLS] = {
+  0x0000, //black   0
+  0x001F, //blue    1
+  0xF800, //red     2
+  0x07E0, //green   3
+  0x07FF, //cyan    4
+  0xF81F, //magenta 5
+  0xFFE0, //yellow  6
+  0xFFFF, //white   7
+  
+  // Solarized
+  0x1AB,  //black   8 
+  0x245A, //blue    9
+  0xD985, //red     10
+  0x84C0, //green   11
+  0x2D13, //cyan    12
+  0xD1B0, //magenta 13
+  0xB440, //yellow  14
+  0xEF5A  //white   15
+};
 
-unsigned int col_black   = 0x0000;
-unsigned int col_blue    = 0x001F;
-unsigned int col_red     = 0xF800;
-unsigned int col_green   = 0x07E0;
-unsigned int col_cyan    = 0x07FF;
-unsigned int col_magenta = 0xF81F;
-unsigned int col_yellow  = 0xFFE0;
-unsigned int col_white   = 0xFFFF;
-
-unsigned int foreground  = col_white;
-unsigned int background  = col_black;
-
+unsigned char foreground  = 7; //col_white;
+unsigned char background  = 0; //col_black;
   
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
 
@@ -96,52 +97,6 @@ void setup(void) {
 
   tftInit();
 
-/*
-  if(sd_card==1)
-  
-  {
-    tft.print("SD!"); 
-File config = SD.open("config.txt");
-
-if(config){ 
-
-  col_black = config.parseInt();
-  col_red   = config.parseInt();
-  col_green = config.parseInt();
-  col_yellow = config.parseInt();
-  col_blue = config.parseInt();
-  col_magenta = config.parseInt();
-  col_cyan = config.parseInt();
-  col_white = config.parseInt();
-  
-  config.close();
-
-}
-  }
-*/
-
-
-/*
-  col_black = 0x1A8;
-  col_red   = 0xD985;
-  col_green = 0x84C0;
-  col_yellow = 0xB440;
-  col_blue = 0x245A;
-  col_magenta = 0xD1B0;
-  col_cyan = 0x2D13;
-  col_white = 0xEF5A;
-
-  foreground = col_white;
-  background = col_black;
-
-  tft_test();
-*/
-/*
-  foreground = col_black;
-  background = col_white;
-
-  tft_test();
-  */
   Serial.begin(9600);
 }
 
@@ -149,66 +104,6 @@ void loop() {
   
   // Nothing
 }
-
-/*
-void tft_test()
-{
-
-  tft.setTextSize(3);
-
-  tft.print("Hello World");
-  delay(500);
-  tft.fillScreen(background);
-
-  tft.setCursor(x_pos, y_pos);
-  tft.setTextColor(col_red, background);
-  tft.print("red");
-  delay(500);
-  tft.fillScreen(background);
-
-  tft.setCursor(x_pos, y_pos);
-  tft.setTextColor(col_green, background);
-  tft.print("green");
-  delay(500);
-  tft.fillScreen(background);
-
-  tft.setCursor(x_pos, y_pos);
-  tft.setTextColor(col_yellow, background);
-  tft.print("yellow");
-  delay(500);
-  tft.fillScreen(background);
-
-  tft.setCursor(x_pos, y_pos);
-  tft.setTextColor(col_blue, background);
-  tft.print("blue");
-  delay(500);
-  tft.fillScreen(background);
-
-  tft.setCursor(x_pos, y_pos);
-  tft.setTextColor(col_magenta, background);
-  tft.print("magenta");
-  delay(500);
-  tft.fillScreen(background);
-
-  tft.setCursor(x_pos, y_pos);
-  tft.setTextColor(col_cyan, background);
-  tft.print("cyan");
-  delay(500);
-  tft.fillScreen(background);
-
-  tft.setCursor(x_pos, y_pos);
-  tft.setTextColor(col_white, background);
-  tft.print("white");
-  delay(500);
-  tft.fillScreen(background);
-
-  tft.setCursor(x_pos, y_pos);
-  delay(500);
-
-  tft.setTextColor(foreground,background);
-  tft.fillScreen(background);
-}
-*/
 
 /*
   SerialEvent occurs whenever a new data comes in the
@@ -339,16 +234,16 @@ void tftInit()
   char i;
   
   tft.setTextWrap(false);
-  tft.fillScreen(background);
+  tft.fillScreen(cols[background]);
   tft.setTextSize(2);
   
   tft.setCursor(x_pos, y_pos);
-  tft.setTextColor(foreground, background);
+  tft.setTextColor(cols[foreground], cols[background]);
 }
 
 void tft_clear()
 {
-  tft.fillScreen(background);
+  tft.fillScreen(cols[background]);
   x_pos=0;
   y_pos=0;
   tft.setCursor(x_pos, y_pos);
@@ -367,82 +262,25 @@ void tft_set_color()
 {
     unsigned int new_color = (unsigned char)inputString[3] | ((unsigned char)inputString[2] << 8);
 
-    switch(inputString[1])
-    {
-      case 0: 
-        col_black = new_color;
-        break;
-      case 1: 
-        col_blue = new_color;
-        break;
-      case 2: 
-        col_red = new_color;
-        break;
-      case 3: 
-        col_green = new_color;
-        break;
-      case 4: 
-        col_cyan = new_color;
-        break;
-      case 5: 
-        col_magenta = new_color;
-        break;
-      case 6: 
-        col_yellow = new_color;
-        break;
-      case 7: 
-        col_white = new_color;
-        break;
-    } 
-}
-
-unsigned int get_color()
-{
-    switch(inputString[1])
-    {
-      case 0: 
-        return col_black;
-        break;
-      case 1: 
-        return col_blue;
-        break;
-      case 2: 
-        return col_red;
-        break;
-      case 3: 
-        return col_green;
-        break;
-      case 4: 
-        return col_cyan;
-        break;
-      case 5: 
-        return col_magenta;
-        break;
-      case 6: 
-        return col_yellow;
-        break;
-      case 7: 
-        return col_white;
-        break;
-    }  
+    cols[inputString[1]] = new_color;
 }
 
 void tft_set_fg_color()
 {
-  if(inputString[1]<=7)
+  if(inputString[1]<MAX_COLS)
   {
-    foreground = get_color();
+    foreground = inputString[1];
   }
-  tft.setTextColor(foreground, background);  
+  tft.setTextColor(cols[foreground], cols[background]); 
 }
 
 void tft_set_bg_color()
 {
-  if(inputString[1]<=7)
+  if(inputString[1]<MAX_COLS)
   {
-    background = get_color();
+    background = inputString[1];
   }  
-  tft.setTextColor(foreground, background);
+  tft.setTextColor(cols[foreground], cols[background]); 
 }
 
 void tft_bol()
@@ -474,31 +312,31 @@ void tft_pix_goto()
 void tft_draw_line()
 {
   // Draw Line, from X1,Y1 to X2,Y2
-  tft.drawLine((int16_t)inputString[1], (int16_t)inputString[2], (int16_t)inputString[3], (int16_t)inputString[4], foreground);
+  tft.drawLine((int16_t)inputString[1], (int16_t)inputString[2], (int16_t)inputString[3], (int16_t)inputString[4], cols[foreground]);
 } 
 
 void tft_draw_box()
 {
   // Draw Box, from X1,Y1 to X2,Y2
-  tft.drawRect((int16_t)inputString[1], (int16_t)inputString[2], (int16_t)inputString[3] - (int16_t)inputString[1], (int16_t)inputString[4] - (int16_t)inputString[2], foreground);
+  tft.drawRect((int16_t)inputString[1], (int16_t)inputString[2], (int16_t)inputString[3] - (int16_t)inputString[1], (int16_t)inputString[4] - (int16_t)inputString[2], cols[foreground]);
 }
 
 void tft_fill_box()
 {
   // Draw Box, from X1,Y1 to X2,Y2 and fill it with colour
-  tft.fillRect((int16_t)inputString[1], (int16_t)inputString[2], (int16_t)inputString[3] - (int16_t)inputString[1], (int16_t)inputString[4] - (int16_t)inputString[2], foreground); 
+  tft.fillRect((int16_t)inputString[1], (int16_t)inputString[2], (int16_t)inputString[3] - (int16_t)inputString[1], (int16_t)inputString[4] - (int16_t)inputString[2], cols[foreground]); 
 }
 
 void tft_draw_circle()
 {
   // Draw circle at x, y, radius
-  tft.drawCircle((int16_t)inputString[1], (int16_t)inputString[2], (int16_t)inputString[3], foreground);
+  tft.drawCircle((int16_t)inputString[1], (int16_t)inputString[2], (int16_t)inputString[3], cols[foreground]);
 }
 
 void tft_fill_circle()
 {
   // Draw circle at x, y, radius and fill
-  tft.fillCircle((int16_t)inputString[1], (int16_t)inputString[2], (int16_t)inputString[3], foreground);
+  tft.fillCircle((int16_t)inputString[1], (int16_t)inputString[2], (int16_t)inputString[3], cols[foreground]);
 }
 
 void tft_rotation()
