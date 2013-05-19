@@ -216,6 +216,9 @@ void serialEvent() {
           case 15:
             tft_set_color();
             break;
+          case 16:
+            tft_draw_pixel();
+            break;
           
         }
         inputString[0] = '\0';
@@ -332,6 +335,18 @@ void tft_pix_goto()
   }  
 }
 
+void tft_draw_pixel()
+{
+  unsigned int color = col_foreground;
+  if (inputStringIndex == 4)
+  {
+    color = cols[inputString[3]];
+  }
+
+  // Draw Pixel, at X1,Y1
+  tft.drawPixel((int16_t)inputString[1], (int16_t)inputString[2], color); 
+}
+
 void tft_draw_line()
 {
   unsigned int color = col_foreground;
@@ -353,7 +368,7 @@ void tft_draw_box()
   }
 
   // Draw Box, from X1,Y1 to X2,Y2
-  tft.drawRect((int16_t)inputString[1], (int16_t)inputString[2], (int16_t)inputString[3] - (int16_t)inputString[1], (int16_t)inputString[4] - (int16_t)inputString[2], color);
+  tft.drawRect((int16_t)inputString[1], (int16_t)inputString[2], (int16_t)inputString[3], (int16_t)inputString[4], color);
 }
 
 void tft_fill_box()
@@ -365,7 +380,7 @@ void tft_fill_box()
   }
 
   // Draw Box, from X1,Y1 to X2,Y2 and fill it with colour
-  tft.fillRect((int16_t)inputString[1], (int16_t)inputString[2], (int16_t)inputString[3] - (int16_t)inputString[1], (int16_t)inputString[4] - (int16_t)inputString[2], color); 
+  tft.fillRect((int16_t)inputString[1], (int16_t)inputString[2], (int16_t)inputString[3], (int16_t)(inputString[4]), color); 
 }
 
 void tft_draw_circle()
