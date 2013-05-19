@@ -25,7 +25,7 @@
 #define MODE_TEXT    0
 #define COMMAND_START 0x1B
 #define COMMAND_END 0xFF
-#define MAX_COLS 16
+#define MAX_COLS 24
 
 unsigned char sd_card=0;       // SD Card inserted?
 unsigned char x_pos=0;
@@ -59,11 +59,24 @@ unsigned int cols[MAX_COLS] = {
   0x2D13, //cyan    12
   0xD1B0, //magenta 13
   0xB440, //yellow  14
+  0xEF5A, //white   15
+  
+  // Solarized
+  0x1AB,  //black   8 
+  0x245A, //blue    9
+  0xD985, //red     10
+  0x84C0, //green   11
+  0x2D13, //cyan    12
+  0xD1B0, //magenta 13
+  0xB440, //yellow  14
   0xEF5A  //white   15
 };
 
 unsigned char foreground  = 7; //col_white;
 unsigned char background  = 0; //col_black;
+
+unsigned int col_foreground = cols[foreground];
+unsigned int col_background = cols[background];
   
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
 
@@ -258,11 +271,19 @@ void tft_fontsize()
   }  
 }
 
+/*
+  We can afford slowdown here,
+  because this command
+  should not be called often!
+*/
 void tft_set_color()
 {
     unsigned int new_color = (unsigned char)inputString[3] | ((unsigned char)inputString[2] << 8);
 
     cols[inputString[1]] = new_color;
+
+    col_background = cols[background];
+    col_foreground = cols[foreground];
 }
 
 void tft_set_fg_color()
@@ -270,8 +291,9 @@ void tft_set_fg_color()
   if(inputString[1]<MAX_COLS)
   {
     foreground = inputString[1];
+    col_foreground = cols[foreground];
   }
-  tft.setTextColor(cols[foreground], cols[background]); 
+  tft.setTextColor(col_foreground, col_background); 
 }
 
 void tft_set_bg_color()
@@ -279,8 +301,9 @@ void tft_set_bg_color()
   if(inputString[1]<MAX_COLS)
   {
     background = inputString[1];
+    col_background = cols[background];
   }  
-  tft.setTextColor(cols[foreground], cols[background]); 
+  tft.setTextColor(col_foreground, col_background); 
 }
 
 void tft_bol()
@@ -311,32 +334,62 @@ void tft_pix_goto()
 
 void tft_draw_line()
 {
+  unsigned int color = col_foreground;
+  if (inputStringIndex == 6)
+  {
+    color = cols[inputString[5]];
+  }
+
   // Draw Line, from X1,Y1 to X2,Y2
-  tft.drawLine((int16_t)inputString[1], (int16_t)inputString[2], (int16_t)inputString[3], (int16_t)inputString[4], cols[foreground]);
+  tft.drawLine((int16_t)inputString[1], (int16_t)inputString[2], (int16_t)inputString[3], (int16_t)inputString[4], color);
 } 
 
 void tft_draw_box()
 {
+  unsigned int color = col_foreground;
+  if (inputStringIndex == 6)
+  {
+    color = cols[inputString[5]];
+  }
+
   // Draw Box, from X1,Y1 to X2,Y2
-  tft.drawRect((int16_t)inputString[1], (int16_t)inputString[2], (int16_t)inputString[3] - (int16_t)inputString[1], (int16_t)inputString[4] - (int16_t)inputString[2], cols[foreground]);
+  tft.drawRect((int16_t)inputString[1], (int16_t)inputString[2], (int16_t)inputString[3] - (int16_t)inputString[1], (int16_t)inputString[4] - (int16_t)inputString[2], color);
 }
 
 void tft_fill_box()
 {
+  unsigned int color = col_foreground;
+  if (inputStringIndex == 6)
+  {
+    color = cols[inputString[5]];
+  }
+
   // Draw Box, from X1,Y1 to X2,Y2 and fill it with colour
-  tft.fillRect((int16_t)inputString[1], (int16_t)inputString[2], (int16_t)inputString[3] - (int16_t)inputString[1], (int16_t)inputString[4] - (int16_t)inputString[2], cols[foreground]); 
+  tft.fillRect((int16_t)inputString[1], (int16_t)inputString[2], (int16_t)inputString[3] - (int16_t)inputString[1], (int16_t)inputString[4] - (int16_t)inputString[2], color); 
 }
 
 void tft_draw_circle()
 {
+  unsigned int color = col_foreground;
+  if (inputStringIndex == 5)
+  {
+    color = cols[inputString[4]];
+  }
+
   // Draw circle at x, y, radius
-  tft.drawCircle((int16_t)inputString[1], (int16_t)inputString[2], (int16_t)inputString[3], cols[foreground]);
+  tft.drawCircle((int16_t)inputString[1], (int16_t)inputString[2], (int16_t)inputString[3], color);
 }
 
 void tft_fill_circle()
 {
+  unsigned int color = col_foreground;
+  if (inputStringIndex == 5)
+  {
+    color = cols[inputString[4]];
+  }
+
   // Draw circle at x, y, radius and fill
-  tft.fillCircle((int16_t)inputString[1], (int16_t)inputString[2], (int16_t)inputString[3], cols[foreground]);
+  tft.fillCircle((int16_t)inputString[1], (int16_t)inputString[2], (int16_t)inputString[3], color);
 }
 
 void tft_rotation()
